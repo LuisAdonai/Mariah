@@ -1,0 +1,229 @@
+{
+  "theme": "light",
+  "archetype": "LUXURY & ATELIER TAILORING (Warm Ivory, Rich Burgundy Wine, Antique Gold, Deep Charcoal)",
+  "emotional_tone": "Elegante, acolhedor, artesanal e profissional. Transmite o prestígio de um atelier de alta costura com a precisão de um sistema de gestão sob medida.",
+  "locale": {
+    "country": "BR",
+    "language": "pt-BR",
+    "currency": "BRL (R$)",
+    "date_format": "dd/MM/yyyy",
+    "number_format": "1.234,56"
+  },
+  "typography": {
+    "heading_font": "Playfair Display Variable",
+    "body_font": "Plus Jakarta Sans Variable",
+    "mono_font": "JetBrains Mono Variable",
+    "scale_px": {
+      "display": 56,
+      "h1": 40,
+      "h2": 30,
+      "h3": 22,
+      "h4": 18,
+      "body": 15,
+      "caption": 13
+    },
+    "rules": {
+      "headings": "font-serif tracking-tight font-semibold text-slate-900 dark:text-amber-50",
+      "body": "font-sans leading-relaxed text-slate-700 dark:text-slate-300",
+      "labels": "font-sans uppercase text-xs tracking-[0.15em] font-medium text-slate-500 dark:text-slate-400",
+      "numbers_monetary": "font-mono font-semibold"
+    }
+  },
+  "colors": {
+    "surfaces": [
+      {
+        "name": "page",
+        "kind": "solid",
+        "bg": "#FAF7F2",
+        "on_bg": "#1C1917",
+        "on_bg_muted": "#57534E",
+        "roles": {
+          "link": "#721727",
+          "error": "#991B1B",
+          "success": "#166534",
+          "accent_highlight": "#B45309"
+        }
+      },
+      {
+        "name": "panel",
+        "kind": "solid",
+        "bg": "#FFFFFF",
+        "on_bg": "#1C1917",
+        "on_bg_muted": "#57534E",
+        "roles": {
+          "border": "#E7E5E4",
+          "gold_border": "#D4AF37",
+          "wine_badge": "#721727"
+        }
+      },
+      {
+        "name": "card_subtle",
+        "kind": "solid",
+        "bg": "#F5EFE6",
+        "on_bg": "#1C1917",
+        "on_bg_muted": "#78716C"
+      },
+      {
+        "name": "sidebar_header",
+        "kind": "solid",
+        "bg": "#1C1917",
+        "on_bg": "#F5F5F4",
+        "on_bg_muted": "#A8A29E",
+        "roles": {
+          "gold_accent": "#E6CA65",
+          "active_tab": "#721727"
+        }
+      },
+      {
+        "name": "receipt_pad_via1",
+        "kind": "solid",
+        "bg": "#FFFDF7",
+        "on_bg": "#1C1917",
+        "on_bg_muted": "#57534E",
+        "roles": {
+          "stamp_header": "#721727",
+          "grid_border": "#78716C"
+        }
+      },
+      {
+        "name": "receipt_pad_via2",
+        "kind": "solid",
+        "bg": "#FBF7EE",
+        "on_bg": "#1C1917",
+        "on_bg_muted": "#57534E",
+        "roles": {
+          "stamp_header": "#854D0E",
+          "grid_border": "#78716C"
+        }
+      },
+      {
+        "name": "receipt_pad_via3",
+        "kind": "solid",
+        "bg": "#F4F7F6",
+        "on_bg": "#1C1917",
+        "on_bg_muted": "#475569",
+        "roles": {
+          "stamp_header": "#1E3A5F",
+          "grid_border": "#64748B"
+        }
+      },
+      {
+        "name": "login_brand_panel",
+        "kind": "solid",
+        "bg": "#2B0B14",
+        "on_bg": "#FAF7F2",
+        "on_bg_muted": "#E7D8C9",
+        "roles": {
+          "gold_foil": "#E6CA65",
+          "wine_glow": "#5C1524"
+        }
+      }
+    ],
+    "accent": "#721727",
+    "on_accent": "#FFFFFF",
+    "secondary_accent": "#C59B27",
+    "on_secondary_accent": "#1C1917",
+    "wine_dark": "#4A0D1A",
+    "gold_rich": "#D4AF37",
+    "gold_light": "#F3E8C8",
+    "warm_border": "#E5DCD0"
+  },
+  "entry_surfaces": {
+    "/": "split atelier dashboard — summary KPI cards in gold/wine styling at top, quick schedule calendar and active fichas table below",
+    "/login": "branded split login — atelier high fashion showcase with Mariáh Noivas brand on left, single store password unlock on right",
+    "/fichas": "fichas management view — search, filters by status, quick action for new rental, and direct link to 3-vias print and WhatsApp",
+    "/fichas/nova": "interactive 3-section rental creation stepper: 1. Cliente & Dados, 2. Trajes & Medidas de Costura, 3. Valores, Sinal & Saldo",
+    "/agenda": "visual calendar & timeline — filtered by Saídas (red/wine), Retornos (blue/navy), and Provas de Ajuste (gold/amber)",
+    "/estoque": "atelier stock catalog with dress & suit photography cards, size/category filters, rental price, and real-time availability status",
+    "/impressao/:id": "exact 3-vias pad reproduction (Via 1 Cliente, Via 2 Loja, Via 3 Costura/Ajustes) optimized for A4 paper and thermal print"
+  },
+  "design_dna": {
+    "brand_name": "Mariáh Noivas — Trajes a Rigor",
+    "tagline": "Aluguel e Venda de Roupas Finas e Acessórios",
+    "store_address": "Av. Senador Teotônio Vilela, 7228 - São Paulo/SP",
+    "store_contacts": "Tel: (11) 5927-6231 • WhatsApp: (11) 97596-2646",
+    "border_radius": "rounded-lg (8px) for cards, rounded-full for pills/badges",
+    "shadows": "shadow-[0_4px_20px_rgba(43,11,20,0.06)] for panels, shadow-[0_1px_3px_rgba(0,0,0,0.08)] for inputs",
+    "details": "Subtle hairline borders with antique gold highlights, wax seal badge motifs, tailored tape measure icons for fittings"
+  },
+  "receipt_3_vias_structure": {
+    "via_1_cliente": {
+      "title": "VIA 1 — CLIENTE (Comprovante e Termos de Locação)",
+      "color_theme": "Vinho Nobre & Dourado (#721727)",
+      "fields": ["Nº Ficha", "Nome Cliente", "Endereço", "Nº", "Bairro", "Cidade", "CPF/RG", "Telefone/WhatsApp", "Trajes Alugados", "Data Saída", "Data Retorno", "Total Geral (R$)", "Sinal Pago (R$)", "Saldo Restante (R$)", "Forma de Pagamento", "Termos Legais e Multa por Atraso/Dano", "Assinatura Cliente", "Local e Data (São Paulo, __ de __ de 2026)"]
+    },
+    "via_2_loja": {
+      "title": "VIA 2 — LOJA (Controle Interno e Caixa)",
+      "color_theme": "Dourado Envelhecido & Carvão (#854D0E)",
+      "fields": ["Nº Ficha", "Nome Cliente", "Telefone", "Trajes & Códigos Estoque", "Data de Saída", "Data de Retorno", "Data da Prova de Ajuste", "Valor Total", "Sinal", "Saldo a Receber na Retirada", "Status de Pagamento", "Assinatura e Visto Atendente"]
+    },
+    "via_3_costura": {
+      "title": "VIA 3 — COSTURA & AJUSTES (Atelier Técnico)",
+      "color_theme": "Azul Marinho Alfaiataria (#1E3A5F)",
+      "fields": ["Nº Ficha", "Nome Cliente", "Data da Prova", "Data de Saída Improrrogável", "Descrição do Traje / Vestido / Smoking", "Medidas Calça / Cintura / Bainha", "Comprimento da Manga", "Comprimento da Calça", "Ajustes Busto / Cintura / Quadril", "Acessórios Inclusos (Gravata, Colete, Tiara, Véu)", "Observações da Costureira / Alfaiate", "Visto de Conclusão dos Ajustes"]
+    }
+  },
+  "image_urls": [
+    {
+      "category": "hero_and_login",
+      "url": "https://images.unsplash.com/photo-1549416878-b9ca95e26903?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTJ8MHwxfHNlYXJjaHwzfHx3ZWRkaW5nJTIwZHJlc3MlMjBicmlkYWwlMjBsdXh1cnl8ZW58MHx8fHwxNzkxODIwNjEzfDA&ixlib=rb-4.1.0&q=85",
+      "description": "Noiva elegante em escadaria com vestido clássico e véu longo — painel de boas-vindas do atelier"
+    },
+    {
+      "category": "bridal_catalog_1",
+      "url": "https://images.unsplash.com/photo-1594552072238-b8a33785b261?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTJ8MHwxfHNlYXJjaHwyfHx3ZWRkaW5nJTIwZHJlc3MlMjBicmlkYWwlMjBsdXh1cnl8ZW58MHx8fHwxNzkxODIwNjEzfDA&ixlib=rb-4.1.0&q=85",
+      "description": "Vestido de noiva modelo Princesa com renda bordada e cauda"
+    },
+    {
+      "category": "bridal_catalog_2",
+      "url": "https://images.unsplash.com/photo-1549417229-7686ac5595fd?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTJ8MHwxfHNlYXJjaHw0fHx3ZWRkaW5nJTIwZHJlc3MlMjBicmlkYWwlMjBsdXh1cnl8ZW58MHx8fHwxNzkxODIwNjEzfDA&ixlib=rb-4.1.0&q=85",
+      "description": "Vestido de noiva Sereia com decote rendado para festa de gala"
+    },
+    {
+      "category": "tuxedo_catalog_1",
+      "url": "https://images.unsplash.com/photo-1617127365659-c47fa864d8bc?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNzl8MHwxfHNlYXJjaHwxfHx0dXhlZG8lMjBzdWl0JTIwZ3Jvb20lMjBmYXNoaW9ufGVufDB8fHx8MTc4ODk2MDcyNnww&ixlib=rb-4.1.0&q=85",
+      "description": "Traje Slim Noivo / Padrinho preto acetinado de alta alfaiataria"
+    },
+    {
+      "category": "tuxedo_catalog_2",
+      "url": "https://images.unsplash.com/photo-1598808503746-f34c53b9323e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNzl8MHwxfHNlYXJjaHw0fHx0dXhlZG8lMjBzdWl0JTIwZ3Jvb20lMjBmYXNoaW9ufGVufDB8fHx8MTc4ODk2MDcyNnww&ixlib=rb-4.1.0&q=85",
+      "description": "Smoking clássico com lapela xale em cetim e gravata italiana"
+    },
+    {
+      "category": "tuxedo_catalog_3",
+      "url": "https://images.unsplash.com/photo-1522968439036-e6338d0ed84f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNzl8MHwxfHNlYXJjaHwzfHx0dXhlZG8lMjBzdWl0JTIwZ3Jvb20lMjBmYXNoaW9ufGVufDB8fHx8MTc4ODk2MDcyNnww&ixlib=rb-4.1.0&q=85",
+      "description": "Smoking Black Tie com gravata borboleta e camisa plissada"
+    }
+  ],
+  "motion_and_interactions": {
+    "transitions": "transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease",
+    "modals": "motion/react fade and scale in (duration: 0.2s, ease: easeOut)",
+    "tabs": "smooth crossfade between Vias de Impressão e abas do Dashboard",
+    "buttons": "active:scale-[0.98] hover:shadow-md",
+    "whatsapp_click": "Direct opening of https://wa.me/55... with URI encoded Portuguese pre-filled message"
+  },
+  "whatsapp_message_templates": {
+    "lembrete_prova": "Olá {cliente}! ✨ Aqui é da Mariáh Noivas. Lembramos que a sua Prova de Ajuste do traje ({traje}) está agendada para o dia {data_prova}. Qualquer dúvida nos avise!",
+    "aviso_retirada": "Olá {cliente}! 👗 Seu traje ({traje}) está pronto e ajustado com todo carinho! A retirada está prevista para {data_saida}. Saldo restante: R$ {saldo}. Te esperamos na Av. Senador Teotônio Vilela, 7228.",
+    "lembrete_devolucao": "Olá {cliente}! Esperamos que sua festa tenha sido inesquecível! 🎉 Lembramos que a devolução do traje está agendada para hoje ({data_retorno}).",
+    "cobranca_saldo": "Olá {cliente}! Passando para confirmar o pagamento do saldo restante de R$ {saldo} referente à Ficha Nº {numero_ficha} da Mariáh Noivas."
+  },
+  "instructions_to_main_agent": [
+    "1. Adotar visual impecável e luxuoso com paleta quente (marfim, vinho/burgundy #721727, detalhes dourados #D4AF37 e carvão elegante #1C1917).",
+    "2. Implementar tela de autenticação por senha única de loja com opção rápida para entrar no modo demonstração com um clique.",
+    "3. Criar a tela de Ficha de Locação em 3 Vias fiéis ao bloco de anotações original ('Mariáh Noivas — Trajes a Rigor', Nº 6936, Av. Senador Teotônio Vilela 7228): Via 1 Cliente, Via 2 Loja, Via 3 Costura/Ajustes.",
+    "4. Implementar visualizador de impressão/PDF das 3 vias (tanto visão individual de cada via quanto visualização das 3 vias lado a lado ou empilhadas em A4 para impressão imediata).",
+    "5. Na Via de Costura (Via 3), incluir campos dedicados de medidas: Calça, Camisa, Comp. Manga, Comp. Calça, Busto, Cintura, Bainha e Observações.",
+    "6. Criar controle financeiro detalhado de cada locação: Valor Total, Sinal pago na reserva, Saldo devedor a receber na retirada e forma de pagamento.",
+    "7. Construir a Agenda Visual filtrada por Saídas, Retornos e Provas de Ajuste com alertas de atrasos em destaque.",
+    "8. Implementar o Cadastro e Gestão de Estoque de Trajes com fotos, categorias (Noiva, Noivo, Debutante, Padrinho, Dama/Pajem, Festa), tamanhos, cores, valor de locação e status (Disponível, Alugado, Em Prova, Em Lavanderia).",
+    "9. Adicionar botão inteligente de WhatsApp que gera o link wa.me com mensagem personalizada pronta (lembrete de prova, retirada, devolução ou saldo).",
+    "10. Garantir que todos os elementos interativos possuam data-testid descritivos no padrão kebab-case (ex: data-testid='ficha-submit-button', data-testid='print-3vias-button', data-testid='whatsapp-reminder-button')."
+  ],
+  "accessibility": {
+    "wcag_compliance": "WCAG AA (mínimo 4.5:1 de contraste para textos normais)",
+    "contrast_check": "Texto escuro #1C1917 sobre marfim #FAF7F2 = 14.8:1; Vinho #721727 sobre branco = 8.1:1; Dourado escuro #854D0E sobre marfim = 5.2:1",
+    "focus_states": "focus:ring-2 focus:ring-amber-600 focus:outline-none",
+    "print_styles": "@media print rules com remoção de sidebars e layout otimizado em alto contraste preto e branco/tons nítidos"
+  }
+}
