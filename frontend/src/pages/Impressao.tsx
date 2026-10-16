@@ -117,6 +117,14 @@ export default function Impressao() {
           <div className="flex h-[196mm] flex-col gap-1.5 border-r-2 border-dotted border-stone-400 p-4" data-testid="print-via-loja">
             <Cabecalho numero={f.numero} via="Via 2 · Loja" color="#854D0E" />
             <Linha label="Nome" value={f.nome} />
+            <div className="grid grid-cols-[1fr_auto] gap-2">
+              <Linha label="End." value={f.endereco} />
+              <Linha label="Nº" value={f.numero_end} className="w-20" />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Linha label="Bairro" value={f.bairro} />
+              <Linha label="CPF" value={f.cpf} />
+            </div>
             <Linha label="Tel." value={[f.telefone, f.telefone2].filter(Boolean).join(" / ")} />
             <Linha label="Trajes" value={trajes} />
             <div className="grid grid-cols-2 gap-2">
