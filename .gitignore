@@ -93,3 +93,6 @@ credentials.json
 *.key
 .credentials
 frontend.zip
+desktop/dist/win-unpacked/Mariah
+Noivas.exe
+desktop/node_modules/electron/dist/electron

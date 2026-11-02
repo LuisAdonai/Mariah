@@ -1,0 +1,5 @@
+.test-data/
+.test-backups/
+dist/
+node_modules/
+web/

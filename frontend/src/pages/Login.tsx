@@ -12,8 +12,7 @@ import { beginSession } from "@/lib/session";
 import { LOJA } from "@/lib/store";
 import type { Me } from "@/lib/types";
 
-const HERO =
-  "https://images.unsplash.com/photo-1549416878-b9ca95e26903?crop=entropy&cs=srgb&fm=jpg&q=80&w=1400";
+const HERO = "/login-hero.jpg";
 
 export default function Login() {
   const navigate = useNavigate();

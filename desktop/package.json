@@ -1,0 +1,73 @@
+{
+  "name": "mariah-noivas",
+  "productName": "Mariah Noivas",
+  "version": "1.0.0",
+  "description": "Mariáh Noivas — Sistema de Locação de Trajes",
+  "author": "Mariáh Noivas",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "web": "rm -rf web && cd ../frontend && yarn build && cp -r dist ../desktop/web && rm -rf ../desktop/web/downloads",
+    "start": "electron .",
+    "server": "node server/standalone.js",
+    "dist": "node build/patch-nsis.js && ELECTRON_BUILDER_NSIS_DIR=${ELECTRON_BUILDER_NSIS_DIR:-/opt/nsis-custom} electron-builder --win nsis --x64"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "electron": "^33.4.11",
+    "electron-builder": "^25.1.8",
+    "resedit": "^2.0.3"
+  },
+  "build": {
+    "appId": "br.com.mariahnoivas.locacao",
+    "productName": "Mariah Noivas",
+    "copyright": "Mariáh Noivas",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "server/**",
+      "web/**",
+      "assets/icon.png",
+      "dados-iniciais.json",
+      "package.json"
+    ],
+    "asar": true,
+    "afterPack": "./build/afterPack.js",
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.ico",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": "always",
+      "createStartMenuShortcut": true,
+      "shortcutName": "Mariáh Noivas",
+      "uninstallDisplayName": "Mariáh Noivas",
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "installerHeaderIcon": "assets/icon.ico",
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": true,
+      "installerLanguages": [
+        "pt_BR"
+      ],
+      "language": "1046",
+      "artifactName": "MariahNoivas-Setup-${version}.exe"
+    }
+  }
+}

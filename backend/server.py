@@ -60,11 +60,12 @@ async def get_status_checks():
     status_checks = await db.status_checks.find().to_list(1000)
     return [StatusCheck(**status_check) for status_check in status_checks]
 
-from routers import auth as auth_routes, trajes as trajes_routes, fichas as fichas_routes  # noqa: E402
+from routers import auth as auth_routes, trajes as trajes_routes, fichas as fichas_routes, backup as backup_routes  # noqa: E402
 
 api_router.include_router(auth_routes.router)
 api_router.include_router(trajes_routes.router)
 api_router.include_router(fichas_routes.router)
+api_router.include_router(backup_routes.router)
 
 # Include the router in the main app
 app.include_router(api_router)

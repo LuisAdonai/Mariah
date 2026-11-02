@@ -102,3 +102,25 @@ export interface Dashboard {
   trajes_total: number;
   trajes_disponiveis: number;
 }
+
+export interface UploadOut {
+  url: string;
+}
+
+export interface BackupInfo {
+  desktop: boolean;
+  pasta_dados: string;
+  pasta_backups: string;
+  backups: string[];
+  proximo_numero: number;
+}
+
+export interface ImportResult {
+  trajes: number;
+  fichas: number;
+  proximo_numero: number;
+}
+
+export interface BackupNow {
+  arquivo: string;
+}

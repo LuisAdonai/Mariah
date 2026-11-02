@@ -1,17 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Pencil, Plus, Search, Shirt, Trash2 } from "lucide-react";
+import { ImagePlus, Pencil, Plus, Search, Shirt, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/AppLayout";
 import { TrajeStatusBadge } from "@/components/StatusBadge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { apiDelete, apiGet, apiPost, apiPut } from "@/lib/api";
 import { brl, CATEGORIAS, errMsg, TRAJE_STATUS } from "@/lib/format";
-import type { Traje, TrajeIn, TrajeStatus } from "@/lib/types";
+import { fileToDataUrl } from "@/lib/image";
+import type { Traje, TrajeIn, TrajeStatus, UploadOut } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const EMPTY: TrajeIn = {
@@ -35,6 +36,22 @@ export default function Estoque() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<TrajeIn>(EMPTY);
   const set = <K extends keyof TrajeIn>(k: K, v: TrajeIn[K]) => setForm((p) => ({ ...p, [k]: v }));
+  const [uploading, setUploading] = useState(false);
+  const onFoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setUploading(true);
+    try {
+      const data_url = await fileToDataUrl(file);
+      const up = await apiPost<UploadOut>("/uploads", { data_url });
+      set("foto_url", up.url);
+    } catch (err) {
+      toast.error(errMsg(err, err instanceof Error ? err.message : "Falha ao enviar a foto"));
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const trajes = useQuery({ queryKey: ["trajes"], queryFn: () => apiGet<Traje[]>("/trajes") });
   const all = trajes.isError ? [] : (trajes.data ?? []);
@@ -147,7 +164,23 @@ export default function Estoque() {
                 ))}
               </div>
             </div>
-            <div className="col-span-2 space-y-1.5"><Label>URL da foto</Label><Input value={form.foto_url} onChange={(e) => set("foto_url", e.target.value)} placeholder="https://..." data-testid="traje-foto-input" /></div>
+            <div className="col-span-2 space-y-1.5">
+              <Label>Foto do traje</Label>
+              <div className="flex items-center gap-3">
+                {form.foto_url ? (
+                  <img src={form.foto_url} alt="" className="size-16 rounded object-cover border border-border" data-testid="traje-foto-preview" />
+                ) : (
+                  <span className="grid size-16 place-items-center rounded bg-parchment"><Shirt className="size-5 text-stone-300" /></span>
+                )}
+                <label className={cn(buttonVariants({ variant: "outline", size: "sm" }), "cursor-pointer")} data-testid="traje-foto-upload-button">
+                  <ImagePlus className="size-4" /> {uploading ? "Enviando..." : "Escolher foto do computador"}
+                  <input type="file" accept="image/*" className="hidden" onChange={onFoto} disabled={uploading} data-testid="traje-foto-file-input" />
+                </label>
+                {form.foto_url && (
+                  <Button type="button" variant="ghost" size="sm" onClick={() => set("foto_url", "")} data-testid="traje-foto-remove-button">Remover</Button>
+                )}
+              </div>
+            </div>
             <div className="col-span-2 space-y-1.5"><Label>Observações</Label><Textarea rows={2} value={form.observacoes} onChange={(e) => set("observacoes", e.target.value)} data-testid="traje-observacoes-input" /></div>
             <DialogFooter className="col-span-2">
               <Button type="submit" disabled={save.isPending} data-testid="traje-submit-button">{editing ? "Salvar" : "Cadastrar"}</Button>
