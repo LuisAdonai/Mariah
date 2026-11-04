@@ -48,6 +48,8 @@ export interface FichaIn {
   numero_end: string;
   bairro: string;
   cpf: string;
+  cep: string;
+  complemento: string;
   telefone: string;
   telefone2: string;
   traje_ids: string[];
@@ -123,4 +125,25 @@ export interface ImportResult {
 
 export interface BackupNow {
   arquivo: string;
+}
+
+export interface Cliente {
+  nome: string;
+  cpf: string;
+  cep: string;
+  endereco: string;
+  numero_end: string;
+  complemento: string;
+  bairro: string;
+  telefone: string;
+  telefone2: string;
+  medidas: Medidas;
+}
+
+export interface CepOut {
+  cep: string;
+  endereco: string;
+  bairro: string;
+  cidade: string;
+  uf: string;
 }

@@ -30,6 +30,7 @@ INDEXES: dict[str, list[IndexModel]] = {
         IndexModel([("data_retorno", ASCENDING)], name="retorno"),
         IndexModel([("data_prova", ASCENDING)], name="prova"),
     ],
+    "clientes": [IndexModel([("cpf_digits", ASCENDING)], name="cpf_digits", unique=True)],
 }
 
 

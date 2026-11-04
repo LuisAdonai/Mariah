@@ -3,7 +3,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const EMPTY = () => ({ trajes: [], fichas: [], counters: { ficha: 0 } });
+const EMPTY = () => ({ trajes: [], fichas: [], clientes: [], counters: { ultimo: 0 } });
 
 class Store {
   constructor(dir) {
@@ -24,7 +24,7 @@ class Store {
       try {
         if (fs.existsSync(f)) {
           const d = JSON.parse(fs.readFileSync(f, "utf8"));
-          return { ...EMPTY(), ...d, counters: { ficha: 0, ...(d.counters || {}) } };
+          return { ...EMPTY(), ...d, counters: { ultimo: 0, ...(d.counters || {}) } };
         }
       } catch (e) {
         console.error(`Falha ao ler ${f}:`, e.message);

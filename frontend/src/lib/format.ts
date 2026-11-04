@@ -58,3 +58,24 @@ export const EVENTO: Record<EventoTipo, { label: string; dot: string; chip: stri
 
 export const CATEGORIAS = ["Noiva", "Noivo", "Debutante", "Padrinho", "Madrinha", "Dama/Pajem", "Festa", "Acessório"];
 export const FORMAS = ["Dinheiro", "Pix", "Cartão de crédito", "Cartão de débito"];
+
+export const onlyDigits = (v: string) => v.replace(/\D/g, "");
+
+export function maskCpf(v: string): string {
+  const d = onlyDigits(v).slice(0, 11);
+  return d.replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+}
+
+export function maskCep(v: string): string {
+  const d = onlyDigits(v).slice(0, 8);
+  return d.length > 5 ? `${d.slice(0, 5)}-${d.slice(5)}` : d;
+}
+
+/** All payment methods used on a ficha (sinal + later payments), without repeats. */
+export function formasPagamento(f: { forma_pagamento: string; pagamentos: { forma: string }[] }): string {
+  return [...new Set([f.forma_pagamento, ...f.pagamentos.map((p) => p.forma)].filter(Boolean))].join(", ");
+}
+
+export function enderecoCompleto(f: { endereco: string; numero_end: string; complemento: string }): string {
+  return [f.endereco, f.numero_end && `nº ${f.numero_end}`, f.complemento].filter(Boolean).join(", ");
+}

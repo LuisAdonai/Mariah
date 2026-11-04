@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { CalendarDays, DatabaseBackup, FilePlus2, FileText, LayoutDashboard, LogOut, Shirt } from "lucide-react";
+import { CalendarDays, DatabaseBackup, FilePlus2, FileText, LayoutDashboard, LogOut, PackageCheck, Shirt } from "lucide-react";
 import { Navigate, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { apiGet } from "@/lib/api";
 import { endSession } from "@/lib/session";
@@ -25,6 +25,7 @@ const NAV = [
   { to: "/fichas", label: "Fichas", icon: FileText, id: "fichas", end: true },
   { to: "/fichas/nova", label: "Nova ficha", icon: FilePlus2, id: "nova-ficha", end: true },
   { to: "/agenda", label: "Agenda", icon: CalendarDays, id: "agenda", end: true },
+  { to: "/saidas", label: "Saídas", icon: PackageCheck, id: "saidas", end: true },
   { to: "/estoque", label: "Estoque", icon: Shirt, id: "estoque", end: true },
   { to: "/backup", label: "Backup", icon: DatabaseBackup, id: "backup", end: true },
 ];

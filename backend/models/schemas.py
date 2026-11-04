@@ -75,6 +75,8 @@ class FichaIn(BaseModel):
     numero_end: str = ""
     bairro: str = ""
     cpf: str = ""
+    cep: str = ""
+    complemento: str = ""
     telefone: str = ""
     telefone2: str = ""
     traje_ids: list[str] = []
@@ -103,6 +105,28 @@ class Ficha(FichaIn):
     created_at: str
     saldo: float = 0
     trajes: list[TrajeRef] = []
+
+
+# ---------- Clientes / CEP ----------
+class Cliente(BaseModel):
+    nome: str = ""
+    cpf: str = ""
+    cep: str = ""
+    endereco: str = ""
+    numero_end: str = ""
+    complemento: str = ""
+    bairro: str = ""
+    telefone: str = ""
+    telefone2: str = ""
+    medidas: Medidas = Medidas()
+
+
+class CepOut(BaseModel):
+    cep: str
+    endereco: str
+    bairro: str
+    cidade: str
+    uf: str
 
 
 # ---------- Agenda / Dashboard ----------

@@ -16,10 +16,10 @@ from pydantic import BaseModel
 from lib.auth import require_auth
 from lib.dates import today_iso
 from lib.db import db
+from lib.numeracao import proximo_numero, ultimo_numero
 
 UPLOADS = Path(__file__).resolve().parent.parent / "uploads"
 UPLOADS.mkdir(exist_ok=True)
-FIRST_NUMERO = 6937
 EXT = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp", "image/gif": ".gif"}
 
 router = APIRouter(tags=["backup"])
@@ -66,13 +66,12 @@ async def get_upload(name: str):
 
 
 async def _seq() -> int:
-    c = await db.counters.find_one({"_id": "ficha"})
-    return int(c["seq"]) if c else 0
+    return await ultimo_numero()
 
 
 @router.get("/backup/info", response_model=BackupInfo, dependencies=[Depends(require_auth)])
 async def info():
-    return BackupInfo(desktop=False, proximo_numero=FIRST_NUMERO + await _seq())
+    return BackupInfo(desktop=False, proximo_numero=await proximo_numero())
 
 
 @router.get("/backup/export", dependencies=[Depends(require_auth)])
@@ -103,7 +102,8 @@ async def export():
         "gerado_em": datetime.now(timezone.utc).isoformat(),
         "trajes": trajes,
         "fichas": fichas,
-        "counters": {"ficha": await _seq()},
+        "clientes": await db.clientes.find({}, {"_id": 0}).to_list(100000),
+        "counters": {"ultimo": await _seq()},
         "fotos": fotos,
     }
     return JSONResponse(payload, headers={"Content-Disposition": f'attachment; filename="mariah-backup-{today_iso()}.json"'})
@@ -116,13 +116,17 @@ async def import_backup(body: dict[str, Any]):
     for name, data in (body.get("fotos") or {}).items():
         (UPLOADS / os.path.basename(name)).write_bytes(base64.b64decode(data))
     fichas = body["fichas"]
+    clientes = body.get("clientes") if isinstance(body.get("clientes"), list) else []
     max_num = max((int(f.get("numero", 0)) for f in fichas), default=0)
-    seq = max(int((body.get("counters") or {}).get("ficha", 0)), max_num - (FIRST_NUMERO - 1) if max_num else 0)
+    ultimo = max(int((body.get("counters") or {}).get("ultimo", 0)), max_num)
     await db.trajes.delete_many({})
     await db.fichas.delete_many({})
+    await db.clientes.delete_many({})
     if body["trajes"]:
         await db.trajes.insert_many([{k: v for k, v in t.items() if k != "_id"} for t in body["trajes"]])
     if fichas:
         await db.fichas.insert_many([{k: v for k, v in f.items() if k != "_id"} for f in fichas])
-    await db.counters.update_one({"_id": "ficha"}, {"$set": {"seq": seq}}, upsert=True)
-    return ImportResult(trajes=len(body["trajes"]), fichas=len(fichas), proximo_numero=FIRST_NUMERO + seq)
+    if clientes:
+        await db.clientes.insert_many([{k: v for k, v in c.items() if k != "_id"} for c in clientes])
+    await db.counters.update_one({"_id": "ficha"}, {"$set": {"ultimo": ultimo}, "$unset": {"seq": ""}}, upsert=True)
+    return ImportResult(trajes=len(body["trajes"]), fichas=len(fichas), proximo_numero=await proximo_numero())

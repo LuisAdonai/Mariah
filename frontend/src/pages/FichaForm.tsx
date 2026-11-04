@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Check, Ruler, Shirt, User, Wallet } from "lucide-react";
-import { useState } from "react";
+import { ArrowLeft, Check, Loader2, Ruler, Shirt, User, Wallet } from "lucide-react";
+import { useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/AppLayout";
@@ -8,9 +8,9 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { apiGet, apiPost, apiPut } from "@/lib/api";
-import { brl, errMsg, FORMAS } from "@/lib/format";
-import type { Ficha, FichaIn, Medidas, Traje } from "@/lib/types";
+import { ApiError, apiGet, apiPost, apiPut } from "@/lib/api";
+import { brl, errMsg, FORMAS, maskCep, maskCpf, onlyDigits } from "@/lib/format";
+import type { CepOut, Cliente, Ficha, FichaIn, Medidas, Traje } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const EMPTY_MEDIDAS: Medidas = {
@@ -18,7 +18,7 @@ const EMPTY_MEDIDAS: Medidas = {
 };
 
 const EMPTY: FichaIn = {
-  nome: "", endereco: "", numero_end: "", bairro: "", cpf: "", telefone: "", telefone2: "",
+  nome: "", endereco: "", numero_end: "", bairro: "", cpf: "", cep: "", complemento: "", telefone: "", telefone2: "",
   traje_ids: [], trajes_descricao: "", data_saida: "", data_retorno: "", data_prova: null,
   medidas: EMPTY_MEDIDAS, total: 0, sinal: 0, forma_pagamento: "", observacoes: "",
 };
@@ -26,6 +26,7 @@ const EMPTY: FichaIn = {
 function toInput(f: Ficha): FichaIn {
   return {
     nome: f.nome, endereco: f.endereco, numero_end: f.numero_end, bairro: f.bairro, cpf: f.cpf,
+    cep: f.cep ?? "", complemento: f.complemento ?? "",
     telefone: f.telefone, telefone2: f.telefone2, traje_ids: f.traje_ids, trajes_descricao: f.trajes_descricao,
     data_saida: f.data_saida, data_retorno: f.data_retorno, data_prova: f.data_prova, medidas: { ...EMPTY_MEDIDAS, ...f.medidas },
     total: f.total, sinal: f.sinal, forma_pagamento: f.forma_pagamento, observacoes: f.observacoes,
@@ -74,6 +75,53 @@ function FichaFormInner({ id, numero, initial }: { id?: string; numero?: number;
   const [totalTouched, setTotalTouched] = useState(!!id);
   const set = <K extends keyof FichaIn>(k: K, v: FichaIn[K]) => setF((p) => ({ ...p, [k]: v }));
   const setM = (k: keyof Medidas, v: string) => setF((p) => ({ ...p, medidas: { ...p.medidas, [k]: v } }));
+
+  // CPF → permanent client registry
+  const [buscandoCpf, setBuscandoCpf] = useState(false);
+  const [cpfMsg, setCpfMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const onCpf = async (raw: string) => {
+    const cpf = maskCpf(raw);
+    set("cpf", cpf);
+    setCpfMsg(null);
+    if (onlyDigits(cpf).length !== 11 || id) return;
+    setBuscandoCpf(true);
+    try {
+      const c = await apiGet<Cliente>(`/clientes/cpf/${onlyDigits(cpf)}`);
+      setF((p) => ({
+        ...p,
+        nome: c.nome || p.nome, cep: c.cep, endereco: c.endereco, numero_end: c.numero_end, complemento: c.complemento,
+        bairro: c.bairro, telefone: c.telefone, telefone2: c.telefone2, medidas: { ...EMPTY_MEDIDAS, ...c.medidas },
+      }));
+      setCpfMsg({ ok: true, text: `Cliente já cadastrada(o): ${c.nome} — dados preenchidos` });
+      toast.success(`Cliente encontrado: ${c.nome}`);
+    } catch (e) {
+      setCpfMsg({ ok: false, text: e instanceof ApiError && e.status === 404 ? "Cliente novo — preencha os dados" : "Não foi possível consultar o cadastro" });
+    } finally {
+      setBuscandoCpf(false);
+    }
+  };
+
+  // CEP → street + neighbourhood
+  const numeroRef = useRef<HTMLInputElement>(null);
+  const [buscandoCep, setBuscandoCep] = useState(false);
+  const [cepMsg, setCepMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const onCep = async (raw: string) => {
+    const cep = maskCep(raw);
+    set("cep", cep);
+    setCepMsg(null);
+    if (onlyDigits(cep).length !== 8) return;
+    setBuscandoCep(true);
+    try {
+      const r = await apiGet<CepOut>(`/cep/${onlyDigits(cep)}`);
+      setF((p) => ({ ...p, endereco: r.endereco || p.endereco, bairro: r.bairro || p.bairro }));
+      setCepMsg({ ok: true, text: `${r.cidade}/${r.uf} — informe o número e o complemento` });
+      numeroRef.current?.focus();
+    } catch (e) {
+      setCepMsg({ ok: false, text: errMsg(e, "CEP não encontrado — preencha o endereço manualmente") });
+    } finally {
+      setBuscandoCep(false);
+    }
+  };
 
   const trajes = useQuery({ queryKey: ["trajes"], queryFn: () => apiGet<Traje[]>("/trajes") });
   const datesOk = !!f.data_saida && !!f.data_retorno && f.data_retorno >= f.data_saida;
@@ -136,20 +184,48 @@ function FichaFormInner({ id, numero, initial }: { id?: string; numero?: number;
         <div className="space-y-6">
           <Section icon={User} n="Via 1 · Cliente" title="Dados do cliente">
             <div className="grid gap-4 sm:grid-cols-6">
-              <Field label="Nome *" className="sm:col-span-6">
+              <Field label="CPF (busca o cadastro do cliente)" className="sm:col-span-3">
+                <div className="relative">
+                  <Input
+                    value={f.cpf}
+                    inputMode="numeric"
+                    placeholder="000.000.000-00"
+                    onChange={(e) => onCpf(e.target.value)}
+                    className="font-mono pr-9"
+                    data-testid="ficha-cpf-input"
+                  />
+                  {buscandoCpf && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 size-4 animate-spin text-muted-foreground" />}
+                </div>
+                {cpfMsg && <p className={cn("text-xs", cpfMsg.ok ? "text-[#166534]" : "text-muted-foreground")} data-testid="ficha-cpf-status">{cpfMsg.text}</p>}
+              </Field>
+              <Field label="Nome *" className="sm:col-span-3">
                 <Input required value={f.nome} onChange={(e) => set("nome", e.target.value)} data-testid="ficha-nome-input" />
               </Field>
-              <Field label="Endereço" className="sm:col-span-4">
+              <Field label="CEP (preenche rua e bairro)" className="sm:col-span-2">
+                <div className="relative">
+                  <Input
+                    value={f.cep}
+                    inputMode="numeric"
+                    placeholder="00000-000"
+                    onChange={(e) => onCep(e.target.value)}
+                    className="font-mono pr-9"
+                    data-testid="ficha-cep-input"
+                  />
+                  {buscandoCep && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 size-4 animate-spin text-muted-foreground" />}
+                </div>
+                {cepMsg && <p className={cn("text-xs", cepMsg.ok ? "text-[#166534]" : "text-wine")} data-testid="ficha-cep-status">{cepMsg.text}</p>}
+              </Field>
+              <Field label="Endereço (rua)" className="sm:col-span-4">
                 <Input value={f.endereco} onChange={(e) => set("endereco", e.target.value)} data-testid="ficha-endereco-input" />
               </Field>
-              <Field label="Nº" className="sm:col-span-2">
-                <Input value={f.numero_end} onChange={(e) => set("numero_end", e.target.value)} data-testid="ficha-numero-end-input" />
+              <Field label="Nº" className="sm:col-span-1">
+                <Input ref={numeroRef} value={f.numero_end} onChange={(e) => set("numero_end", e.target.value)} data-testid="ficha-numero-end-input" />
+              </Field>
+              <Field label="Complemento" className="sm:col-span-2">
+                <Input value={f.complemento} placeholder="Casa, apto, bloco..." onChange={(e) => set("complemento", e.target.value)} data-testid="ficha-complemento-input" />
               </Field>
               <Field label="Bairro" className="sm:col-span-3">
                 <Input value={f.bairro} onChange={(e) => set("bairro", e.target.value)} data-testid="ficha-bairro-input" />
-              </Field>
-              <Field label="CPF" className="sm:col-span-3">
-                <Input value={f.cpf} onChange={(e) => set("cpf", e.target.value)} data-testid="ficha-cpf-input" />
               </Field>
               <Field label="Telefone / WhatsApp" className="sm:col-span-3">
                 <Input value={f.telefone} placeholder="(11) 90000-0000" onChange={(e) => set("telefone", e.target.value)} data-testid="ficha-telefone-input" />

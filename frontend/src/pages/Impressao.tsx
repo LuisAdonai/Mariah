@@ -3,7 +3,7 @@ import { ArrowLeft, Printer } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { apiGet } from "@/lib/api";
-import { brl, dataBR, dataExtenso } from "@/lib/format";
+import { brl, dataBR, dataExtenso, formasPagamento } from "@/lib/format";
 import { LOJA, TERMOS } from "@/lib/store";
 import type { Ficha } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -94,6 +94,10 @@ export default function Impressao() {
               <Linha label="End." value={f.endereco} />
               <Linha label="Nº" value={f.numero_end} className="w-20" />
             </div>
+            <div className="grid grid-cols-[1fr_auto] gap-2">
+              <Linha label="Compl." value={f.complemento} />
+              <Linha label="CEP" value={f.cep} className="w-28" />
+            </div>
             <div className="grid grid-cols-2 gap-2">
               <Linha label="Bairro" value={f.bairro} />
               <Linha label="Tel." value={f.telefone} />
@@ -108,7 +112,11 @@ export default function Impressao() {
               <Linha label="Retorno" value={dataBR(f.data_retorno)} />
             </div>
             <Linha label="Total" value={brl(f.total)} />
-            <Linha label="Sinal" value={`${brl(f.sinal)}${f.forma_pagamento ? ` (${f.forma_pagamento})` : ""}`} />
+            <Linha label="Sinal" value={brl(f.sinal)} />
+            {f.pagamentos.map((p) => (
+              <Linha key={p.id} label={`Pago ${dataBR(p.data)}`} value={brl(p.valor)} />
+            ))}
+            <Linha label="Forma de pgto." value={formasPagamento(f)} />
             <Linha label="Saldo" value={brl(f.saldo)} />
             <Rodape f={f} />
           </div>
@@ -120,6 +128,10 @@ export default function Impressao() {
             <div className="grid grid-cols-[1fr_auto] gap-2">
               <Linha label="End." value={f.endereco} />
               <Linha label="Nº" value={f.numero_end} className="w-20" />
+            </div>
+            <div className="grid grid-cols-[1fr_auto] gap-2">
+              <Linha label="Compl." value={f.complemento} />
+              <Linha label="CEP" value={f.cep} className="w-28" />
             </div>
             <div className="grid grid-cols-2 gap-2">
               <Linha label="Bairro" value={f.bairro} />
@@ -133,10 +145,11 @@ export default function Impressao() {
             </div>
             <Linha label="Prova" value={f.data_prova ? dataBR(f.data_prova) : ""} />
             <Linha label="Total" value={brl(f.total)} />
-            <Linha label="Sinal" value={brl(f.sinal)} />
+            <Linha label="Sinal" value={`${brl(f.sinal)}${f.forma_pagamento ? ` (${f.forma_pagamento})` : ""}`} />
             {f.pagamentos.map((p) => (
               <Linha key={p.id} label={`Pago ${dataBR(p.data)}`} value={`${brl(p.valor)} ${p.forma}`} />
             ))}
+            <Linha label="Forma de pgto." value={formasPagamento(f)} />
             <Linha label="Saldo" value={brl(f.saldo)} />
             <Linha label="Obs." value={f.observacoes} />
             <Rodape f={f} />

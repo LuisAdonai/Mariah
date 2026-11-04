@@ -5,7 +5,7 @@ UI em pt-BR. Auth: senha única da loja (env STORE_PASSWORD) → cookie httpOnly
 
 ## Data model (Mongo)
 - `trajes`: id, codigo, nome, categoria, tamanho, cor, valor_locacao, status (disponivel|alugado|prova|lavanderia), foto_url, observacoes
-- `fichas`: id, numero (auto, counter `counters._id=ficha`, começa em 6937), dados cliente (nome, endereco, numero_end, bairro, cpf, telefone, telefone2), traje_ids[], trajes_descricao, data_saida/data_retorno/data_prova (YYYY-MM-DD strings), medidas{traje,calca,camisa,comp_manga,comp_calca,busto,cintura,observacoes}, total, sinal, forma_pagamento, observacoes, status (reservado|retirado|devolvido|cancelado), pagamentos[{id,valor,forma,data}], created_at. `saldo` = total − sinal − Σpagamentos (computado).
+- `fichas`: id, numero (auto; counters{_id:ficha}.ultimo = último emitido; nunca abaixo de 7001 — fichas antigas 6937–6944 mantêm o número), dados cliente (nome, cpf, cep, endereco, numero_end, complemento, bairro, telefone, telefone2), traje_ids[], trajes_descricao, data_saida/data_retorno/data_prova (YYYY-MM-DD strings), medidas{traje,calca,camisa,comp_manga,comp_calca,busto,cintura,observacoes}, total, sinal, forma_pagamento, observacoes, status (reservado|retirado|devolvido|cancelado), pagamentos[{id,valor,forma,data}], created_at. `saldo` = total − sinal − Σpagamentos (computado).
 
 ## API (/api, all except /auth/login|logout require cookie)
 - POST /auth/login {password}, POST /auth/logout, GET /auth/me
@@ -31,3 +31,11 @@ WhatsApp: botões abrem wa.me com mensagens prontas (prova, retirada, devoluçã
 - Primeira execução importa dados-iniciais.json (export do ambiente de teste). Senha fixa mariah2026.
 - Build (pod ARM64, sem Wine): `cd /app/desktop && yarn web && yarn dist` — usa NSIS nativo (/opt/nsis-custom = /usr/share/nsis + plugins do electron-builder), build/patch-nsis.js (UninstallerReader sem Wine) e build/afterPack.js (ícone via resedit).
 - Instalador publicado em frontend/public/downloads/MariahNoivas-Setup-1.0.0.exe.
+
+## v1.1 (nov/2026)
+- Numeração nova começa em 7001 (lib/numeracao.py; desktop: counters.ultimo).
+- `clientes` (cadastro permanente por CPF, cpf_digits único): atualizado a cada ficha salva com CPF de 11 dígitos. GET /api/clientes/cpf/{cpf} (fallback: última ficha com esse CPF). Nova ficha: digitar CPF completo preenche os dados.
+- GET /api/cep/{cep} (ViaCEP via backend; 404/503 → usuário preenche manualmente). Campos cep + complemento na ficha e nas vias.
+- Via Cliente e Via Loja mostram "Forma de pgto." (sinal + pagamentos).
+- Aba Saídas (/saidas): fichas com retirada de sexta a domingo (navegação por fim de semana), Nº contrato, cliente, traje, retirada, restante/Pago, botões Retirou/Devolvido/Desfazer, imprimir planilha. GET /api/fichas?saida_de&saida_ate (exclui cancelados).
+- Backup inclui `clientes` e counters.ultimo. Desktop v1.1.0: frontend/public/downloads/MariahNoivas-Setup-1.1.0.exe.

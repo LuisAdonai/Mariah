@@ -10,6 +10,7 @@ import Agenda from "@/pages/Agenda";
 import Estoque from "@/pages/Estoque";
 import Impressao from "@/pages/Impressao";
 import Backup from "@/pages/Backup";
+import Saidas from "@/pages/Saidas";
 
 // One <Route> per page in src/pages; BrowserRouter already wraps this in main.tsx.
 export default function App() {
@@ -26,6 +27,7 @@ export default function App() {
             <Route path="/fichas/:id" element={<FichaDetalhe />} />
             <Route path="/fichas/:id/editar" element={<FichaForm />} />
             <Route path="/agenda" element={<Agenda />} />
+            <Route path="/saidas" element={<Saidas />} />
             <Route path="/estoque" element={<Estoque />} />
             <Route path="/backup" element={<Backup />} />
           </Route>

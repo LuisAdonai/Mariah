@@ -6,7 +6,7 @@ const path = require("path");
 const express = require("express");
 const { Store } = require("./store");
 
-const FIRST_NUMERO = 6937;
+const MIN_NUMERO = 7001;
 const STORE_PASSWORD = "mariah2026";
 const COOKIE = "mn_session";
 const ACTIVE = ["reservado", "retirado"];
@@ -72,6 +72,8 @@ function parseFicha(b) {
     numero_end: str(b.numero_end),
     bairro: str(b.bairro),
     cpf: str(b.cpf),
+    cep: str(b.cep),
+    complemento: str(b.complemento),
     telefone: str(b.telefone),
     telefone2: str(b.telefone2),
     traje_ids: Array.isArray(b.traje_ids) ? b.traje_ids.map(String) : [],
@@ -124,6 +126,24 @@ function createApp({ dataDir, backupsDir = null, staticDir = null, seedFile = nu
   }
   const firstRun = !store.exists();
   const db = () => store.data;
+  db().clientes = Array.isArray(db().clientes) ? db().clientes : [];
+
+  // numbering: counters.ultimo = last number issued; never below MIN_NUMERO
+  const maxExisting = () => db().fichas.reduce((m, f) => Math.max(m, Number(f.numero) || 0), 0);
+  const ultimoNumero = () => Math.max(Number(db().counters.ultimo) || 0, maxExisting());
+  const proximoNumero = () => Math.max(MIN_NUMERO, ultimoNumero() + 1);
+
+  // permanent client registry by CPF
+  const digits = (v) => str(v).replace(/\D/g, "");
+  const CLIENTE_FIELDS = ["nome", "cpf", "cep", "endereco", "numero_end", "complemento", "bairro", "telefone", "telefone2", "medidas"];
+  function upsertCliente(body) {
+    const cpf = digits(body.cpf);
+    if (cpf.length !== 11) return;
+    const data = Object.fromEntries(CLIENTE_FIELDS.map((k) => [k, body[k]]));
+    const rec = { ...data, cpf_digits: cpf, updated_at: new Date().toISOString() };
+    const i = db().clientes.findIndex((c) => c.cpf_digits === cpf);
+    if (i >= 0) db().clientes[i] = rec; else db().clientes.push(rec);
+  }
 
   // ---------- shared domain logic ----------
   const trajesMap = () => new Map(db().trajes.map((t) => [t.id, { id: t.id, codigo: t.codigo, nome: t.nome }]));
@@ -189,7 +209,8 @@ function createApp({ dataDir, backupsDir = null, staticDir = null, seedFile = nu
       gerado_em: new Date().toISOString(),
       trajes: db().trajes,
       fichas: db().fichas,
-      counters: { ficha: db().counters.ficha },
+      clientes: db().clientes,
+      counters: { ultimo: ultimoNumero() },
       fotos,
     };
   }
@@ -204,16 +225,17 @@ function createApp({ dataDir, backupsDir = null, staticDir = null, seedFile = nu
       fs.writeFileSync(path.join(store.fotosDir, safe), Buffer.from(data, "base64"));
     }
     const maxNumero = b.fichas.reduce((m, f) => Math.max(m, Number(f.numero) || 0), 0);
-    const seq = Math.max(Number(b.counters?.ficha) || 0, maxNumero ? maxNumero - (FIRST_NUMERO - 1) : 0);
+    const ultimo = Math.max(Number(b.counters?.ultimo) || 0, maxNumero);
     store.replaceAll({
       trajes: b.trajes.map((t) => ({ id: t.id || uuid(), ...parseTraje(t) })),
       fichas: b.fichas.map((f) => ({
         ...parseFicha(f), id: f.id || uuid(), numero: Number(f.numero), status: FICHA_STATUS.includes(f.status) ? f.status : "reservado",
         pagamentos: Array.isArray(f.pagamentos) ? f.pagamentos : [], created_at: f.created_at || new Date().toISOString(),
       })),
-      counters: { ficha: seq },
+      clientes: Array.isArray(b.clientes) ? b.clientes : [],
+      counters: { ultimo },
     });
-    return { trajes: store.data.trajes.length, fichas: store.data.fichas.length, proximo_numero: FIRST_NUMERO + seq };
+    return { trajes: store.data.trajes.length, fichas: store.data.fichas.length, proximo_numero: proximoNumero() };
   }
   function writeBackupFile(prefix = "auto") {
     if (!backupsDir) return null;
@@ -297,9 +319,11 @@ function createApp({ dataDir, backupsDir = null, staticDir = null, seedFile = nu
   api.get("/fichas", auth, h((req) => {
     const q = str(req.query.q).trim().toLowerCase();
     const status = str(req.query.status);
+    const de = str(req.query.saida_de), ate = str(req.query.saida_ate);
     const tmap = trajesMap();
     return db().fichas
       .filter((f) => !status || f.status === status)
+      .filter((f) => (!de && !ate) || ((status || f.status !== "cancelado") && (!de || f.data_saida >= de) && (!ate || f.data_saida <= ate)))
       .filter((f) => !q || [f.nome, f.cpf, f.telefone].some((v) => str(v).toLowerCase().includes(q)) || (/^\d+$/.test(q) && f.numero === Number(q)))
       .sort((a, b) => b.numero - a.numero)
       .map((f) => toFicha(f, tmap));
@@ -308,12 +332,14 @@ function createApp({ dataDir, backupsDir = null, staticDir = null, seedFile = nu
   api.post("/fichas", auth, h((req, res) => {
     const body = parseFicha(req.body || {});
     validate(body);
-    db().counters.ficha += 1;
+    const numero = proximoNumero();
+    db().counters.ultimo = numero;
     const doc = {
-      ...body, id: uuid(), numero: FIRST_NUMERO - 1 + db().counters.ficha, status: "reservado",
+      ...body, id: uuid(), numero, status: "reservado",
       pagamentos: [], created_at: new Date().toISOString(),
     };
     db().fichas.push(doc);
+    upsertCliente(body);
     store.save();
     res.status(201);
     return toFicha(doc, trajesMap());
@@ -323,6 +349,7 @@ function createApp({ dataDir, backupsDir = null, staticDir = null, seedFile = nu
     const body = parseFicha(req.body || {});
     validate(body, doc.id);
     Object.assign(doc, body);
+    upsertCliente(body);
     store.save();
     return toFicha(doc, trajesMap());
   }));
@@ -377,6 +404,38 @@ function createApp({ dataDir, backupsDir = null, staticDir = null, seedFile = nu
     };
   }));
 
+  // clientes + CEP
+  api.get("/clientes/cpf/:cpf", auth, h((req) => {
+    const d = digits(req.params.cpf);
+    if (d.length !== 11) throw new HttpError(400, "CPF deve ter 11 dígitos");
+    let c = db().clientes.find((x) => x.cpf_digits === d);
+    if (!c) {
+      const f = [...db().fichas].sort((a, b) => b.numero - a.numero).find((x) => digits(x.cpf) === d);
+      if (f) c = Object.fromEntries(CLIENTE_FIELDS.map((k) => [k, f[k]]));
+    }
+    if (!c) throw new HttpError(404, "Cliente não cadastrado");
+    const m = c.medidas || {};
+    return {
+      ...Object.fromEntries(CLIENTE_FIELDS.filter((k) => k !== "medidas").map((k) => [k, str(c[k])])),
+      medidas: Object.fromEntries(MEDIDAS.map((k) => [k, str(m[k])])),
+    };
+  }));
+  api.get("/cep/:cep", auth, async (req, res, next) => {
+    try {
+      const d = digits(req.params.cep);
+      if (d.length !== 8) throw new HttpError(400, "CEP deve ter 8 dígitos");
+      let data;
+      try {
+        const r = await fetch(`https://viacep.com.br/ws/${d}/json/`, { signal: AbortSignal.timeout(8000) });
+        data = r.ok ? await r.json() : { erro: true };
+      } catch {
+        throw new HttpError(503, "Sem internet para consultar o CEP — preencha o endereço manualmente");
+      }
+      if (data.erro) throw new HttpError(404, "CEP não encontrado — preencha o endereço manualmente");
+      res.json({ cep: `${d.slice(0, 5)}-${d.slice(5)}`, endereco: str(data.logradouro), bairro: str(data.bairro), cidade: str(data.localidade), uf: str(data.uf) });
+    } catch (e) { next(e); }
+  });
+
   // local photo storage
   api.post("/uploads", auth, h((req) => {
     const m = /^data:(image\/[a-z+]+);base64,(.+)$/s.exec(str(req.body?.data_url));
@@ -398,7 +457,7 @@ function createApp({ dataDir, backupsDir = null, staticDir = null, seedFile = nu
     pasta_dados: dataDir,
     pasta_backups: backupsDir || "",
     backups: backupsDir && fs.existsSync(backupsDir) ? fs.readdirSync(backupsDir).filter((n) => n.endsWith(".json")).sort().reverse().slice(0, 10) : [],
-    proximo_numero: FIRST_NUMERO + db().counters.ficha,
+    proximo_numero: proximoNumero(),
   })));
   api.get("/backup/export", auth, (req, res, next) => {
     try {

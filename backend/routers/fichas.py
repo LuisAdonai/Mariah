@@ -2,11 +2,11 @@ import re
 from datetime import date, datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
-from pymongo import ReturnDocument
 
 from lib.auth import require_auth
 from lib.dates import today_iso
 from lib.db import db
+from lib.numeracao import next_numero
 from models.schemas import (
     AgendaEvento,
     Dashboard,
@@ -18,11 +18,10 @@ from models.schemas import (
     TrajeRef,
     new_id,
 )
+from routers.clientes import upsert_cliente
 from routers.trajes import busy_traje_ids
 
 router = APIRouter(tags=["fichas"], dependencies=[Depends(require_auth)])
-
-FIRST_NUMERO = 6937
 
 
 async def trajes_map() -> dict[str, TrajeRef]:
@@ -71,10 +70,13 @@ async def get_doc(id: str) -> dict:
 
 
 @router.get("/fichas", response_model=list[Ficha])
-async def list_fichas(q: str | None = None, status: str | None = None):
+async def list_fichas(q: str | None = None, status: str | None = None, saida_de: str | None = None, saida_ate: str | None = None):
     query: dict = {}
     if status:
         query["status"] = status
+    if saida_de or saida_ate:
+        query["data_saida"] = {**({"$gte": saida_de} if saida_de else {}), **({"$lte": saida_ate} if saida_ate else {})}
+        query.setdefault("status", {"$ne": "cancelado"})
     if q:
         rx = {"$regex": re.escape(q), "$options": "i"}
         ors: list[dict] = [{"nome": rx}, {"cpf": rx}, {"telefone": rx}]
@@ -94,15 +96,13 @@ async def get_ficha(id: str):
 @router.post("/fichas", response_model=Ficha, status_code=201)
 async def create_ficha(body: FichaIn):
     await validate(body)
-    counter = await db.counters.find_one_and_update(
-        {"_id": "ficha"}, {"$inc": {"seq": 1}}, upsert=True, return_document=ReturnDocument.AFTER
-    )
-    numero = FIRST_NUMERO - 1 + counter["seq"]
+    numero = await next_numero()
     doc = {
         **body.model_dump(), "id": new_id(), "numero": numero, "status": "reservado",
         "pagamentos": [], "created_at": datetime.now(timezone.utc).isoformat(),
     }
     await db.fichas.insert_one(dict(doc))
+    await upsert_cliente(body)
     return to_ficha(doc, await trajes_map())
 
 
@@ -111,6 +111,7 @@ async def update_ficha(id: str, body: FichaIn):
     await get_doc(id)
     await validate(body, exclude=id)
     await db.fichas.update_one({"id": id}, {"$set": body.model_dump()})
+    await upsert_cliente(body)
     return to_ficha(await get_doc(id), await trajes_map())
 
 

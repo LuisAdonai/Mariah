@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/api";
-import { brl, dataBR, errMsg, FORMAS } from "@/lib/format";
+import { brl, dataBR, enderecoCompleto, errMsg, FORMAS } from "@/lib/format";
 import type { Ficha, FichaStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -141,7 +141,8 @@ export default function FichaDetalhe() {
               <Info label="Nome" value={f.nome} testid="ficha-detail-nome" />
               <Info label="Telefone" value={[f.telefone, f.telefone2].filter(Boolean).join(" · ")} testid="ficha-detail-telefone" />
               <Info label="CPF" value={f.cpf} testid="ficha-detail-cpf" mono />
-              <Info label="Endereço" value={[f.endereco, f.numero_end && `nº ${f.numero_end}`].filter(Boolean).join(", ")} testid="ficha-detail-endereco" />
+              <Info label="Endereço" value={enderecoCompleto(f)} testid="ficha-detail-endereco" />
+              <Info label="CEP" value={f.cep} testid="ficha-detail-cep" mono />
               <Info label="Bairro" value={f.bairro} testid="ficha-detail-bairro" />
             </div>
           </Card>

@@ -57,11 +57,11 @@ async def main() -> None:
         ]
         for i, f in enumerate(fichas, start=1):
             await db.fichas.insert_one({
-                **f, "id": new_id(), "numero": 6936 + i, "telefone2": "", "trajes_descricao": "",
+                **f, "id": new_id(), "numero": 7000 + i, "telefone2": "", "cep": "", "complemento": "", "trajes_descricao": "",
                 "observacoes": "", "pagamentos": [], "created_at": datetime.now(timezone.utc).isoformat(),
                 "medidas": {**{k: "" for k in ("traje", "calca", "camisa", "comp_manga", "comp_calca", "busto", "cintura", "observacoes")}, **f["medidas"]},
             })
-        await db.counters.update_one({"_id": "ficha"}, {"$set": {"seq": len(fichas)}}, upsert=True)
+        await db.counters.update_one({"_id": "ficha"}, {"$set": {"ultimo": 7000 + len(fichas)}}, upsert=True)
         print("fichas seeded")
 
 

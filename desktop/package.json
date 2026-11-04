@@ -1,7 +1,7 @@
 {
   "name": "mariah-noivas",
   "productName": "Mariah Noivas",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Mariáh Noivas — Sistema de Locação de Trajes",
   "author": "Mariáh Noivas",
   "main": "main.js",
@@ -10,7 +10,7 @@
     "web": "rm -rf web && cd ../frontend && yarn build && cp -r dist ../desktop/web && rm -rf ../desktop/web/downloads",
     "start": "electron .",
     "server": "node server/standalone.js",
-    "dist": "node build/patch-nsis.js && ELECTRON_BUILDER_NSIS_DIR=${ELECTRON_BUILDER_NSIS_DIR:-/opt/nsis-custom} electron-builder --win nsis --x64"
+    "dist": "bash build/setup-nsis.sh && node build/patch-nsis.js && ELECTRON_BUILDER_NSIS_DIR=${ELECTRON_BUILDER_NSIS_DIR:-/opt/nsis-custom} electron-builder --win nsis --x64"
   },
   "dependencies": {
     "express": "^4.21.2"
